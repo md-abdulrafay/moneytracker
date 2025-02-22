@@ -1,0 +1,14 @@
+{% extends 'admin/base.html' %} {%load static%} {% block branding %}
+
+<h1 id="head">
+  <img src="{% static 'img/logonew.png' %}" width="35" height="35" />
+  MoneyTracker
+</h1>
+
+{% endblock %} {% block extrastyle%}
+
+<link rel="stylesheet" href="{% static 'css/adminstyle.css'%}" />
+
+{%endblock %} {% block extrahead %}
+<link rel="icon" href="{% static 'img/logonew.png' %}" type="image/x-icon" />
+{% endblock %} {% block title %}MoneyTracker Admin{% endblock %}

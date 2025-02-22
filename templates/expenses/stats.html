@@ -1,0 +1,77 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div class="container mt-0">
+  <div class="row mb-0">
+    <div class="col-md-10">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Expenses Summary
+          </li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-md-2">
+      <a href="{% url 'dashboard' %}" class="btn btn-primary w-100">Back</a>
+    </div>
+  </div>
+
+  <div class="row justify-content-center mb-4">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h3 class="card-title mb-0">Category Distribution</h3>
+        </div>
+        <div class="card-body">
+          <canvas id="myChart" width="400" height="200"></canvas>
+          <div
+            id="noDataMessage"
+            style="display: none; text-align: center; margin-top: 10px"
+          >
+            No data available to display.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h3 class="card-title mb-0">Weekly Expenses</h3>
+        </div>
+        <div class="card-body">
+          <canvas id="weeklyChart" width="400" height="200"></canvas>
+          <div
+            id="noWeeklyDataMessage"
+            style="display: none; text-align: center; margin-top: 10px"
+          >
+            No data available to display.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h3 class="card-title mb-0">Yearly Expenses</h3>
+        </div>
+        <div class="card-body">
+          <canvas id="yearlyChart" width="400" height="200"></canvas>
+          <div
+            id="noYearlyDataMessage"
+            style="display: none; text-align: center; margin-top: 10px"
+          >
+            No data available to display.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/expensecharts.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-0">
+  {% comment %}
+  <h2 class="text-center mb-4 font-weight-bold">Budget Summary</h2>
+  {% endcomment %}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+      <h3 class="card-title mb-0">Category Budgets</h3>
+    </div>
+    <div class="card-body">
+      <table
+        class="table table-bordered table-hover"
+        style="
+          border: 2px solid black;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        "
+      >
+        <thead class="thead-dark">
+          <tr>
+            <th style="border: 1px solid black; color: white">Category</th>
+            <th style="border: 1px solid black; color: white">
+              Budgeted Amount
+            </th>
+            <th style="border: 1px solid black; color: white">Spent</th>
+            <th style="border: 1px solid black; color: white">Remaining</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for budget in budgets %}
+          <tr>
+            <td style="border: 1px solid black">{{ budget.category.name }}</td>
+            <td style="border: 1px solid black">{{ budget.amount }}</td>
+            <td style="border: 1px solid black">{{ budget.spent }}</td>
+            <td
+              style="border: 1px solid black; color: {% if budget.remaining < 0 %}red{% else %}black{% endif %};"
+            >
+              {{ budget.remaining }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-success text-white">
+      <h3 class="card-title mb-0">Budget Graph</h3>
+    </div>
+    <div class="card-body">
+      <canvas id="budgetChart" width="300" height="150"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('budgetChart').getContext('2d');
+  const colors = [
+    'rgba(255, 99, 132, 0.2)',
+    'rgba(54, 162, 235, 0.2)',
+    'rgba(255, 206, 86, 0.2)',
+    'rgba(75, 192, 192, 0.2)',
+    'rgba(153, 102, 255, 0.2)',
+    'rgba(255, 159, 64, 0.2)',
+    'rgba(199, 199, 199, 0.2)'
+  ];
+  const borderColors = [
+    'rgba(255, 99, 132, 1)',
+    'rgba(54, 162, 235, 1)',
+    'rgba(255, 206, 86, 1)',
+    'rgba(75, 192, 192, 1)',
+    'rgba(153, 102, 255, 1)',
+    'rgba(255, 159, 64, 1)',
+    'rgba(199, 199, 199, 1)'
+  ];
+  const budgetChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [{% for budget in budgets %}'{{ budget.category.name }}',{% endfor %}],
+      datasets: [{
+        label: 'Budgeted Amount',
+        data: [{% for budget in budgets %}{{ budget.amount }},{% endfor %}],
+        backgroundColor: colors,
+        borderColor: borderColors,
+        borderWidth: 1
+      }, {
+        label: 'Spent Amount',
+        data: [{% for budget in budgets %}{{ budget.spent }},{% endfor %}],
+        backgroundColor: colors.map(color => color.replace('0.2', '0.5')),
+        borderColor: borderColors,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}
