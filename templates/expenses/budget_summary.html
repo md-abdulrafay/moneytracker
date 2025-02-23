@@ -2,6 +2,8 @@
 <div class="container mt-0">
   {% if budget_message %}
   <div class="alert alert-success" role="alert">{{ budget_message }}</div>
+  {% endif %} {% if reset_message %}
+  <div class="alert alert-warning" role="alert">{{ reset_message }}</div>
   {% endif %}
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-primary text-white">
