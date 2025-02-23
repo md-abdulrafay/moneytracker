@@ -225,42 +225,67 @@ def category_insights_view(request):
 @login_required(login_url='/authentication/login')
 def set_budget(request):
     if request.method == "POST":
-        if "category" in request.POST:
+        if "category" in request.POST and request.POST["category"] != "all":
             category_id = request.POST["category"]
             amount = request.POST["amount"]
+            start_date = request.POST["start_date"]
             end_date = request.POST["end_date"]
             
             category = Category.objects.get(id=category_id)
             budget, created = Budget.objects.get_or_create(
-                owner=request.user, category=category, defaults={"amount": amount, "end_date": end_date}
+                owner=request.user, category=category, defaults={"amount": amount, "start_date": start_date, "end_date": end_date}
             )
             if not created:
                 budget.amount = amount
+                budget.start_date = start_date
                 budget.end_date = end_date
                 budget.save()
 
-            messages.success(request, "Category budget set successfully!")
+            request.session['budget_message'] = "Category budget set successfully!"
         else:
             amount = request.POST["amount"]
+            start_date = request.POST["start_date"]
             end_date = request.POST["end_date"]
             
             monthly_budget, created = MonthlyBudget.objects.get_or_create(
-                owner=request.user, defaults={"amount": amount, "end_date": end_date}
+                owner=request.user, defaults={"amount": amount, "start_date": start_date, "end_date": end_date}
             )
             if not created:
                 monthly_budget.amount = amount
+                monthly_budget.start_date = start_date
                 monthly_budget.end_date = end_date
                 monthly_budget.save()
 
-            messages.success(request, "Monthly budget set successfully!")
+            request.session['budget_message'] = "Monthly budget set successfully!"
 
         return redirect("budget-summary")
 
     categories = Category.objects.all()
     return render(request, "expenses/set_budget.html", {"categories": categories})
 
+def reset_expired_budgets(user):
+    today = datetime.date.today()
+    expired_budgets = Budget.objects.filter(owner=user, end_date__lt=today)
+    expired_monthly_budgets = MonthlyBudget.objects.filter(owner=user, end_date__lt=today)
+    reset_message = None
+
+    if expired_budgets.exists() or expired_monthly_budgets.exists():
+        reset_message = "Some budgets have been reset as their end date has exceeded."
+
+    for budget in expired_budgets:
+        budget.amount = 0
+        budget.save()
+
+    for monthly_budget in expired_monthly_budgets:
+        monthly_budget.amount = 0
+        monthly_budget.save()
+
+    return reset_message
+
 @login_required(login_url='/authentication/login')
 def budget_summary(request):
+    reset_message = reset_expired_budgets(request.user)  # Reset expired budgets
+
     budgets = Budget.objects.filter(owner=request.user)
     
     # Fetch total spending per category using category names (since Expense.category is a string)
@@ -282,10 +307,53 @@ def budget_summary(request):
     total_spent = Expense.objects.filter(owner=request.user, date__month=datetime.date.today().month).aggregate(total=Sum("amount"))["total"] or 0
     remaining = monthly_budget.amount - total_spent if monthly_budget else 0
 
+    budget_message = request.session.pop('budget_message', None)
+
     return render(request, "expenses/budget_summary.html", {
         "budgets": budgets,
         "monthly_budget": monthly_budget,
         "total_spent": total_spent,
-        "remaining": remaining
+        "remaining": remaining,
+        "budget_message": budget_message,
+        "reset_message": reset_message
     })
+
+@login_required(login_url='/authentication/login')
+def edit_budget(request, id):
+    budget = Budget.objects.get(pk=id)
+    categories = Category.objects.all()
+    if request.method == "POST":
+        budget.amount = request.POST["amount"]
+        budget.start_date = request.POST["start_date"]
+        budget.end_date = request.POST["end_date"]
+        budget.save()
+        messages.success(request, "Budget updated successfully!")
+        return redirect("budget-summary")
+    return render(request, "expenses/edit_budget.html", {"budget": budget, "categories": categories})
+
+@login_required(login_url='/authentication/login')
+def delete_budget(request, id):
+    budget = Budget.objects.get(pk=id)
+    budget.delete()
+    messages.success(request, "Budget deleted successfully!")
+    return redirect("budget-summary")
+
+@login_required(login_url='/authentication/login')
+def edit_monthly_budget(request, id):
+    monthly_budget = MonthlyBudget.objects.get(pk=id)
+    if request.method == "POST":
+        monthly_budget.amount = request.POST.get("amount", monthly_budget.amount)
+        monthly_budget.start_date = request.POST.get("start_date", monthly_budget.start_date)
+        monthly_budget.end_date = request.POST.get("end_date", monthly_budget.end_date)
+        monthly_budget.save()
+        messages.success(request, "Monthly budget updated successfully!")
+        return redirect("budget-summary")
+    return render(request, "expenses/edit_monthly_budget.html", {"monthly_budget": monthly_budget})
+
+@login_required(login_url='/authentication/login')
+def delete_monthly_budget(request, id):
+    monthly_budget = MonthlyBudget.objects.get(pk=id)
+    monthly_budget.delete()
+    messages.success(request, "Monthly budget deleted successfully!")
+    return redirect("budget-summary")
 

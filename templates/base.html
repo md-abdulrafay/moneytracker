@@ -39,11 +39,16 @@
       class="navbar navbar-black fixed-top bg-dark flex-md-nowrap p-0 shadow"
     >
       <a
-        class="navbar-brand col-sm-3 col-md-2 mr-0"
+        class="navbar-brand col-sm-3 col-md-2 mr-0 d-flex align-items-center"
         href="{% url 'dashboard' %}"
         style="background-color: #1e90ff; font-weight: bold; color: #ffffff"
       >
-        MoneyTracker
+        <img
+          src="{% static 'img/dashboardlogo.png' %}"
+          alt="Logo"
+          style="height: 30px; margin-right: 10px"
+        />
+        <span style="font-size: 1.5rem">MoneyTracker</span>
       </a>
 
       <ul

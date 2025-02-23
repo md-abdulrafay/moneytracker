@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from .views import get_balance_data
-from .views import set_budget, budget_summary
+from .views import set_budget, budget_summary, edit_budget, delete_budget, edit_monthly_budget, delete_monthly_budget
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -19,4 +19,8 @@ urlpatterns = [
     path('category_insights/', views.category_insights_view, name='category_insights'),
     path("set-budget/", set_budget, name="set-budget"),
     path("budget-summary/", budget_summary, name="budget-summary"),
+    path("edit-budget/<int:id>/", edit_budget, name="edit-budget"),
+    path("delete-budget/<int:id>/", delete_budget, name="delete-budget"),
+    path("edit-monthly-budget/<int:id>/", edit_monthly_budget, name="edit-monthly-budget"),
+    path("delete-monthly-budget/<int:id>/", delete_monthly_budget, name="delete-monthly-budget"),
 ]
